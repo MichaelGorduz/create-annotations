@@ -1,49 +1,34 @@
 package org.example;
-
-// Создание аннотации с параметрами
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-// Создание аннотации с параметрами
-@Retention(RetentionPolicy.RUNTIME)
+import java.lang.annotation.*;
+import java.lang.reflect.*;
+@Target(value= ElementType.METHOD)
+@Retention(value = RetentionPolicy.RUNTIME)
 @interface MyAnnotation {
-    String value();
-    int count();
+    int a();
+    int b();
 }
 
-// Класс, содержащий метод, помеченный аннотацией
 class MyClass {
-    @MyAnnotation(value = "Hello World!", count = 5)
-    public void myMethod() {
-        System.out.println("myMethod() invoked");
+    @MyAnnotation(a = 2, b = 5)
+    public static void test(int a, int b) {
+        System.out.println(a + " + " + b + " = " + (a + b));
     }
 }
 
 public class Main {
-    public static void main(String[] args) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-
-        ; // Получение объекта класса MyClass
-        MyClass obj = new MyClass();
-
-        // Получение ссылки на метод с помощью рефлексии
-        Method method = MyClass.class.getMethod("myMethod");
-
-        // Проверка наличия аннотации
-        if (method.isAnnotationPresent(MyAnnotation.class)) {
-            // Получение объекта аннотации
-            MyAnnotation annotation = method.getAnnotation(MyAnnotation.class);
-
-            // Получение параметров аннотации и вызов метода
-            String value = annotation.value();
-            int count = annotation.count();
-
-            System.out.println("Значение параметра value: " + value);
-            System.out.println("Значение параметра count: " + count);
-
-            method.invoke(obj); // Вызов метода с помощью рефлексии
+    public static void main(String[] args) {
+        Class<?> cls = MyClass.class;
+        Method[] methods = cls.getMethods();
+        try {
+            for (Method method : methods) {
+                if (method.isAnnotationPresent(MyAnnotation.class)) {
+                    method.invoke(null, method.getAnnotation(MyAnnotation.class).a(),
+                            method.getAnnotation(MyAnnotation.class).b());
+                }
+            }
+        }catch (Exception ex) {
+            ex.printStackTrace();
         }
+
     }
 }
